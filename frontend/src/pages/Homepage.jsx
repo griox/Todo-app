@@ -7,7 +7,7 @@ import TaskPagination from '@/components/TaskPagination'
 import DateTimeFilter from '@/components/DateTimeFilter' // đảm bảo file tồn tại và đúng chữ hoa/thường
 import Header from '@/components/Header'
 import { toast } from 'sonner'
-import axios from 'axios'
+import api from '@/lib/axios'
 const Homepage = () => {
   const [taskBuffer, setTaskBuffer] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
@@ -21,7 +21,7 @@ const Homepage = () => {
   // Fetch tasks from the backend
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/tasks?filter=${dateQuery}`);
+      const response = await api.get(`/tasks?filter=${dateQuery}`);
       console.log('Fetched tasks:', response.data);
       setTaskBuffer(response.data.tasks);
       setPendingCount(response.data.pendingCount);
