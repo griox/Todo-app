@@ -5,7 +5,7 @@ import { configDotenv } from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 
-configDotenv()
+configDotenv({ quiet: true })
 const Port = process.env.PORT || 5001;
 const __dirname = path.resolve();
 const app = express();
@@ -33,6 +33,5 @@ connectDB().then(() => {
 }).catch((error) => {
   console.error("Database connection error:", error);
 });
-
 
 

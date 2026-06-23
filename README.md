@@ -62,13 +62,24 @@ https://todo-app-griox.onrender.com
    - Create `backend/.env`:
      ```
      PORT=5001
-     MONGO_URI=mongodb://localhost:27017/todoapp
+     MONGODB_URI=mongodb://localhost:27017/todoapp
      ```
+   - For MongoDB Atlas, include the database name after the host:
+     ```
+     MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/todoapp?retryWrites=true&w=majority
+     ```
+     If the password contains special characters like `@`, `/`, `?`, or `#`, encode it before placing it in the URI.
    - For production, use MongoDB Atlas URI.
 
 5. **Start MongoDB** (if local):
    ```bash
    mongod
+   ```
+
+6. **Initialize the database**:
+   ```bash
+   cd backend
+   npm run db:init
    ```
 
 ## Usage

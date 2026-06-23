@@ -1,0 +1,60 @@
+name: Pull Request Shellcheck & Gemini Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: Code Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate PR Diff
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD > pr-diff.txt || true
+
+      - name: Run Shellcheck on changed shell scripts
+        run: |
+          # Find changed .sh files (excluding deleted ones)
+          CHANGED_SH_FILES=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD | grep '\.sh$' || true)
+          if [ -n "$CHANGED_SH_FILES" ]; then
+            echo "Running shellcheck on: $CHANGED_SH_FILES"
+            # Run shellcheck and write output to shellcheck-report.txt
+            # Using || true to ensure workflow continues even if shellcheck finds issues
+            shellcheck $CHANGED_SH_FILES > shellcheck-report.txt 2>&1 || true
+          else
+            echo "No changed shell scripts (.sh) to run Shellcheck on."
+            touch shellcheck-report.txt
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Gemini Review Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/gemini_review.py
+
+      - name: Post Comment to PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -s review-comment.txt ]; then
+            echo "Posting review comment to PR..."
+            gh pr comment ${{ github.event.pull_request.number }} --body-file review-comment.txt
+          else
+            echo "Review comment file is empty or missing. Skipping comment."
+          fi
