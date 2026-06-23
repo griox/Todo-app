@@ -78,6 +78,12 @@ def main():
 
     # Call Gemini API
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key={api_key}"
+    # Use gemini-2.5-flash if needed, or fallback
+    url_flash = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    
+    # Try gemini-2.5-flash first since it has a very high free tier quota
+    url = url_flash
+
     headers = {"Content-Type": "application/json"}
     payload = {
         "contents": [
@@ -93,7 +99,7 @@ def main():
     req = urllib.request.Request(url, data=req_data, headers=headers, method="POST")
 
     try:
-        print("Sending request to Gemini API (gemini-2.5-pro)...")
+        print("Sending request to Gemini API (gemini-2.5-flash)...")
         with urllib.request.urlopen(req) as response:
             res_data = response.read().decode("utf-8")
             res_json = json.loads(res_data)
